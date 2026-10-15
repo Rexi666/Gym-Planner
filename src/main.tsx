@@ -175,8 +175,8 @@ function RoutineForm({ initial, exercises, save }: { initial: Routine; exercises
     <p className="muted">Son objetivos editables, no una prescripción de entrenamiento. El peso se registra en cada sesión.</p>
     <div className="superset-toolbar stack"><strong>Superseries</strong><p className="muted">Marca dos o más ejercicios y agrúpalos. Se colocarán juntos y se moverán como un bloque.</p><button type="button" className="secondary" disabled={selected.length < 2} onClick={makeGroup}>Crear superserie ({selected.length})</button></div>
     {r.items.map((x, i) => <section className={`card inset stack ${supersetLabel(r.items, x.superset_id) ? 'superset-card' : ''}`} key={i}>
-      <div className="row wrap"><label className="inline"><input type="checkbox" checked={selected.includes(i)} onChange={e => setSelected(e.target.checked ? [...selected, i] : selected.filter(n => n !== i))}/>Seleccionar para superserie</label>
-      {supersetLabel(r.items, x.superset_id) && <><span className="superset-badge">{supersetLabel(r.items, x.superset_id)}</span><button type="button" className="ghost" onClick={() => { setR({ ...r, items: r.items.map(item => item.superset_id === x.superset_id ? { ...item, superset_id: null } : item) }); setSelected([]); }}>Deshacer grupo</button></>}</div><div className="row wrap"><strong>{i + 1}. {x.name}</strong><div className="actions"><button type="button" className="ghost" disabled={i === 0} onClick={() => move(i, -1)}>Subir</button><button type="button" className="ghost" disabled={i === r.items.length - 1} onClick={() => move(i, 1)}>Bajar</button><button type="button" className="danger ghost" onClick={() => { setR({ ...r, items: cleanGroups(r.items.filter((_, n) => n !== i)) }); setSelected([]); }}>Quitar</button></div></div>
+      <div className="row wrap"><label className="inline"><input type="checkbox" checked={selected.includes(i)} onChange={e => setSelected(e.target.checked ? [...selected, i] : selected.filter(n => n !== i))} />Seleccionar para superserie</label>
+        {supersetLabel(r.items, x.superset_id) && <><span className="superset-badge">{supersetLabel(r.items, x.superset_id)}</span><button type="button" className="ghost" onClick={() => { setR({ ...r, items: r.items.map(item => item.superset_id === x.superset_id ? { ...item, superset_id: null } : item) }); setSelected([]); }}>Deshacer grupo</button></>}</div><div className="row wrap"><strong>{i + 1}. {x.name}</strong><div className="actions"><button type="button" className="ghost" disabled={i === 0} onClick={() => move(i, -1)}>Subir</button><button type="button" className="ghost" disabled={i === r.items.length - 1} onClick={() => move(i, 1)}>Bajar</button><button type="button" className="danger ghost" onClick={() => { setR({ ...r, items: cleanGroups(r.items.filter((_, n) => n !== i)) }); setSelected([]); }}>Quitar</button></div></div>
       <div className="cols three"><label>Series<input type="number" min={1} max={100} required value={x.sets} onChange={e => change(i, { sets: Number(e.target.value) })} /></label><label>Repeticiones<input type="number" min={1} max={10000} required value={x.reps} onChange={e => change(i, { reps: Number(e.target.value) })} /></label><label>Descanso (s)<input type="number" min={0} max={3600} required value={x.rest} onChange={e => change(i, { rest: Number(e.target.value) })} /></label></div>
       <label>Notas<input value={x.notes} onChange={e => change(i, { notes: e.target.value })} /></label></section>)}
     <button type="button" className="secondary" onClick={() => setPicker(!picker)}>+ Añadir ejercicio</button>
@@ -222,9 +222,9 @@ function WorkoutView({ workout: w, store, change, close, details, saveTemplate }
       const stats = exerciseStats(store.data.records, ex.exercise_id, w.id);
       return <section className={`card stack ${supersetLabel(w.exercises, ex.superset_id) ? 'superset-card' : ''}`} key={ex.id}>
         {supersetLabel(w.exercises, ex.superset_id) && <div className="superset-header"><span className="superset-badge">{supersetLabel(w.exercises, ex.superset_id)}</span><p className="muted">{w.exercises.filter(e => e.superset_id === ex.superset_id).map(e => e.name).join(' → ')}. Completa la misma ronda en todos; el descanso comienza al completar el bloque.</p></div>}<div className="row wrap"><div><span className="eyebrow">EJERCICIO {index + 1}</span><h2>{ex.name}</h2>{definition && <MuscleBadges exercise={definition} />}</div><div className="actions wrap">
-        {definition && <button className="ghost" onClick={() => details(definition)}>Ver técnica</button>}
-        <button className="ghost" disabled={index === 0} onClick={() => move(index, -1)}>Subir</button><button className="ghost" disabled={index === w.exercises.length - 1} onClick={() => move(index, 1)}>Bajar</button>
-        <button className="ghost" onClick={() => { setReplaceId(ex.id); setPicker(true); }}>Sustituir</button><button className="danger ghost" onClick={() => { if (confirm('Quitar este ejercicio y sus series de esta sesión?')) change({ ...w, exercises: cleanGroups(w.exercises.filter(e => e.id !== ex.id)) }); }}>Quitar</button></div></div>
+          {definition && <button className="ghost" onClick={() => details(definition)}>Ver técnica</button>}
+          <button className="ghost" disabled={index === 0} onClick={() => move(index, -1)}>Subir</button><button className="ghost" disabled={index === w.exercises.length - 1} onClick={() => move(index, 1)}>Bajar</button>
+          <button className="ghost" onClick={() => { setReplaceId(ex.id); setPicker(true); }}>Sustituir</button><button className="danger ghost" onClick={() => { if (confirm('Quitar este ejercicio y sus series de esta sesión?')) change({ ...w, exercises: cleanGroups(w.exercises.filter(e => e.id !== ex.id)) }); }}>Quitar</button></div></div>
         <Stats store={store} exerciseId={ex.exercise_id} exclude={w.id} />
         {stats.last && <button className="secondary" onClick={() => { if (ex.sets.some(s => s.done) && !confirm('Reemplazar las series actuales por las de la última sesión?')) return; editEx(ex.id, { sets: stats.last!.sets.map(s => ({ ...s, id: uuid(), done: false })) }); }}>Usar series de la última vez</button>}
         <div className="set-row set-heading"><span>Serie</span><span>Reps</span><span>kg</span><span>Cal.</span><span>Hecha</span><span /></div>
@@ -351,9 +351,108 @@ function App({ session }: { session: Session }) {
       }
     });
   }
+  async function deleteWorkout(w: Workout) {
+    requireOnline();
+
+    if (w.status !== 'completed') {
+      throw new Error(
+        'Solo puedes eliminar entrenamientos finalizados.'
+      );
+    }
+
+    if (store.syncing || pendingCount(store.data) > 0) {
+      throw new Error(
+        'Sincroniza los cambios pendientes antes de eliminar entrenamientos.'
+      );
+    }
+
+    const record = store.data.records[w.id];
+
+    if (!record || record.conflict) {
+      throw new Error(
+        'Recarga los datos y resuelve los conflictos antes de eliminar.'
+      );
+    }
+
+    if (!confirm(
+      `¿Eliminar "${w.name}" del ${date(w.started_at)}?\n\n` +
+      'Se eliminarán sus ejercicios realizados y sus series. ' +
+      'Las rutinas y la biblioteca no se modificarán.\n\n' +
+      'Exporta una copia antes si quieres poder recuperarlo.'
+    )) {
+      return;
+    }
+
+    const { data: deleted, error } = await supabase!
+      .from('workouts')
+      .delete()
+      .eq('id', w.id)
+      .eq('user_id', session.user.id)
+      .eq('status', 'completed')
+      .eq('revision', record.revision)
+      .select('id');
+
+    if (error) throw error;
+
+    if (!deleted?.length) {
+      throw new Error(
+        'El entrenamiento ha cambiado o ya no existe. ' +
+        'Recarga los datos desde Ajustes antes de continuar.'
+      );
+    }
+
+    delete store.data.records[w.id];
+    store.persist();
+
+    if (currentId === w.id) {
+      setCurrentId(null);
+    }
+  }
+
   function workoutCard(w: Workout) {
-    const sets = w.exercises.flatMap(e => e.sets).filter(s => s.done);
-    return <article className="card row wrap" key={w.id}><div><small className="muted">{date(w.started_at)}</small><h3>{w.name}</h3><p className="muted">{w.exercises.length} ejercicios / {sets.length} series completadas</p></div><button className={w.status === 'active' ? '' : 'secondary'} onClick={() => setCurrentId(w.id)}>{w.status === 'active' ? 'Continuar' : 'Ver / editar'}</button></article>;
+    const sets = w.exercises
+      .flatMap(e => e.sets)
+      .filter(s => s.done);
+
+    return (
+      <article className="card row wrap" key={w.id}>
+        <div>
+          <small className="muted">
+            {date(w.started_at)}
+          </small>
+
+          <h3>{w.name}</h3>
+
+          <p className="muted">
+            {w.exercises.length} ejercicios / {sets.length} series completadas
+          </p>
+        </div>
+
+        <div className="actions wrap">
+          <button
+            className={w.status === 'active' ? '' : 'secondary'}
+            onClick={() => setCurrentId(w.id)}
+          >
+            {w.status === 'active' ? 'Continuar' : 'Ver / editar'}
+          </button>
+
+          {w.status === 'completed' && (
+            <button
+              className="ghost danger"
+              disabled={
+                !online ||
+                busy ||
+                store.syncing ||
+                pending > 0
+              }
+              onClick={() => void run(() => deleteWorkout(w))}
+            >
+              Eliminar
+            </button>
+          )}
+        </div>
+      </article>
+    );
   }
   const filtered = data.exercises.filter(e => true && (!muscle || groupsOf(e).includes(muscle)) && `${e.name} ${e.equipment}`.toLocaleLowerCase('es').includes(query.toLocaleLowerCase('es')));
   if (store.readFailed) return <main className="auth card"><h1>No se pudo leer la copia local</h1><p>No se han sobrescrito los datos. Exporta el contenido para recuperarlo antes de borrar nada.</p><button onClick={() => download('gym-planner-recuperación.json', { raw: localStorage.getItem(`gym-planner:v1:${session.user.id}`) })}>Exportar copia sin modificar</button></main>;
@@ -402,7 +501,7 @@ function App({ session }: { session: Session }) {
     {dialog?.kind === 'exercise' && <Modal title="Editar ejercicio" close={() => setDialog(null)}><ExerciseForm initial={dialog.value} save={saveExercise} /></Modal>}
     {dialog?.kind === 'routine' && <Modal title="Editar rutina" close={() => setDialog(null)}><RoutineForm initial={dialog.value} exercises={data.exercises} save={saveRoutine} /></Modal>}
     {dialog?.kind === 'detail' && <Modal title={dialog.value.name} close={() => setDialog(null)}><div className="stack"><MuscleBadges exercise={dialog.value} /><p className="muted">{dialog.value.equipment}</p><MediaView exercise={dialog.value} /><Stats store={store} exerciseId={dialog.value.id} exclude={current?.id} full /></div></Modal>}
-    {showImport && <ImportDialog store={store} userId={session.user.id} close={() => setShowImport(false)} download={download}/>}
+    {showImport && <ImportDialog store={store} userId={session.user.id} close={() => setShowImport(false)} download={download} />}
     <footer>Gym Planner / Tus datos, tu progreso</footer>
   </div>;
 }
